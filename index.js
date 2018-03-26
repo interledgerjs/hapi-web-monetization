@@ -4,9 +4,9 @@ const getIlpPlugin = require('ilp-plugin')
 const debug = require('debug')('hapi-web-monetization')
 const Boom = require('boom')
 
-class HapiWebMontezation {
-  constructor(opts) {
-    this.connect = false
+class HapiWebMonetization {
+  constructor (opts) {
+    this.connected = false
     this.plugin = (opts && opts.plugin) || getIlpPlugin()
     this.buckets = new Map()
     this.balanceEvents = new EventEmitter()
@@ -14,7 +14,7 @@ class HapiWebMontezation {
     this.maxBalance = (opts && opts.maxBalance) || Infinity
   }
 
-  async connect() {
+  async connect () {
     if (this.connected) return
     this.connected = true
     await this.plugin.connect()
@@ -41,7 +41,7 @@ class HapiWebMontezation {
   spend (id, price) {
     // Spend credit accumulated from browser monetising user on site. E.g. Viewing paid content.
     const balance = this.buckets.get(id)
-    if(balance < price) {
+    if (balance < price) {
       throw new Error('insufficient balance on id.' +
       ' id=' + id,
       ' price=' + price,
@@ -51,29 +51,50 @@ class HapiWebMontezation {
     this.buckets.set(id, balance - price)
   }
 
-  paid ({price, awaitBalance = false }) {
+  async paid ({ price, awaitBalance = false }) {
     // Returns async function which is passed as middleware
-    return async (request, reply) => {
-      const id = request.params.id
+    const id = request.params.id
 
-      if (!id) {
-        return ctx.throw(400, 'request.params.id must be defined')
-      }
+    if (!id) {
+      var error = new Error('Undefined ID');
+      Boom.boomify(error, { statusCode: 400 });
+    }
+    const _price = Number(price)
+    // const _price = (typeof price === 'function')
+    //   ? Number(price(ctx))
+    //   : Number(price)
 
-      const _price = (typeof price === 'function')
-        ? Number(price(ctx))
-        : Number(price)
+    if (awaitBalance) {
+      await this.awaitBalance(id, _price)
+    }
 
-      if (awaitBalance) {
-        await this.awaitBalance(id, _price)
-      }
-
-      try {
-        this.spend(id, _price)
-        return reply('Spent!')
-      } catch (e) {
-        throw Boom.notFound(e.message)
-      }
+    try {
+      this.spend(id, _price)
+      return 'Spent'
+    } catch (e) {
+      throw Boom.paymentRequired(e.message)
     }
   }
+
+  async receiver (request, reply) {
+    await this.connect()
+    if (request.headers.accept !== 'application/spsp+json') {
+      throw Boom.notFound('Wrong headers')
+    }
+    const {destinationAccount, sharedSecret} = this.receiver.generateAddressAndSecret()
+    const segments = destinationAccount.split('.')
+
+    const resultAccount = segments.slice(0, -2).join('.') +
+    '.' + request.params.id +
+    '.' + segments.slice(-2).join('.')
+
+    const response = reply.response({
+      destination_account: resultAccount,
+      shared_secret: sharedSecret.toString('base64')
+    })
+    response.type('application/spsp+json')
+    return response
+  }
 }
+
+module.exports = HapiWebMonetization
