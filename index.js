@@ -38,9 +38,27 @@ class HapiWebMonetization {
     })
   }
 
+  awaitBalance (id, balance) {
+    debug('awaiting balance. id=' + id, 'balance=' + balance)
+    return new Promise(resolve => {
+      const handleBalanceUpdate = _balance => {
+        if (_balance < balance) return
+
+        setImmediate(() =>
+          this.balanceEvents.removeListener(id, handleBalanceUpdate))
+        resolve()
+      }
+
+      this.balanceEvents.on(id, handleBalanceUpdate)
+    })
+  }
+
   spend (id, price) {
     // Spend credit accumulated from browser monetising user on site. E.g. Viewing paid content.
     const balance = this.buckets.get(id)
+    if (!balance) {
+      throw new Error('Balance does not exist - you must add a wallet.')
+    }
     if (balance < price) {
       throw new Error('insufficient balance on id.' +
       ' id=' + id,

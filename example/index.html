@@ -12,11 +12,11 @@
     getMonetizationId('http://localhost:8080/pay/:id')
       .then(id => {
         console.log("ID", id);
-        // var img = document.createElement('img')
-        // var container = document.getElementById('container')
-        // img.src = '/content/' + id
-        // img.width = '600'
-        // container.appendChild(img)
+        var img = document.createElement('img')
+        var container = document.getElementById('container')
+        img.src = '/content/' + id
+        img.width = '600'
+        container.appendChild(img)
       })
   </script>
 </body>

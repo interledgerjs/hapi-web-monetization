@@ -29,7 +29,6 @@ const start = async () => {
       method: 'GET',
       path: '/pay/{id}',
       handler: async function (request, reply) {
-        console.log("monetization", typeof monetization.receive)
         return monetization.receive(request, reply)
       }
     },
@@ -43,9 +42,9 @@ const start = async () => {
             assign: 'paid'
           }
         ],
-        handler: function (request, reply) {
-          console.log("get content")
-          return {paid: true}
+        handler: async function (request, reply) {
+          const file = await fs.readFile(path.resolve(__dirname, 'content.jpg'))
+          return file
         }
       }
     },
