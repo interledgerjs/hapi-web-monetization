@@ -51,13 +51,13 @@ class HapiWebMonetization {
     this.buckets.set(id, balance - price)
   }
 
-  async paid ({ price, awaitBalance = false }) {
+  async paid (request, reply, { price, awaitBalance = false }) {
     // Returns async function which is passed as middleware
     const id = request.params.id
 
     if (!id) {
-      var error = new Error('Undefined ID');
-      Boom.boomify(error, { statusCode: 400 });
+      var error = new Error('Undefined ID')
+      Boom.boomify(error, { statusCode: 400 })
     }
     const _price = Number(price)
     // const _price = (typeof price === 'function')
@@ -76,7 +76,7 @@ class HapiWebMonetization {
     }
   }
 
-  async receiver (request, reply) {
+  async receive (request, reply) {
     await this.connect()
     if (request.headers.accept !== 'application/spsp+json') {
       throw Boom.notFound('Wrong headers')

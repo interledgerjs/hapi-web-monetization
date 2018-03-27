@@ -10,9 +10,8 @@ const server = Hapi.server({
 })
 
 function payMiddleware (request, reply) {
-  return monetization.paid({ price: 100, awaitBalance: true })
+  return monetization.paid(request, reply, { price: 100, awaitBalance: true })
 }
-
 
 const start = async () => {
   await server.register(require('inert'))
@@ -21,16 +20,17 @@ const start = async () => {
     {
       method: 'GET',
       path: '/',
-      handler: function (request, h) {
+      handler: function (request, reply) {
         console.log("WE IN HERE")
-        return h.file('./example/index.html')
+        return reply.file('./example/index.html')
       }
     },
     {
       method: 'GET',
       path: '/pay/{id}',
       handler: async function (request, reply) {
-        return monetization.receiver(request, reply)
+        console.log("monetization", typeof monetization.receive)
+        return monetization.receive(request, reply)
       }
     },
     {
@@ -52,11 +52,9 @@ const start = async () => {
     {
       method: 'GET',
       path: '/client.js',
-      handler: async function (request, h) {
-        // console.log("INHER")
+      handler: async function (request, reply) {
         const clientFile = await fs.readFile(path.resolve(__dirname, '../client.js'))
-        console.log("clientFile", clientFile)
-        return h.response(clientFile)
+        return reply.response(clientFile)
       }
     }
   ])
