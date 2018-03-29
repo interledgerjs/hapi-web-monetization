@@ -77,10 +77,9 @@ class HapiWebMonetization {
       var error = new Error('Undefined ID')
       Boom.boomify(error, { statusCode: 400 })
     }
-    const _price = Number(price)
-    // const _price = (typeof price === 'function')
-    //   ? Number(price(ctx))
-    //   : Number(price)
+    const _price = (typeof price === 'function')
+      ? Number(price(request))
+      : Number(price)
 
     if (awaitBalance) {
       await this.awaitBalance(id, _price)

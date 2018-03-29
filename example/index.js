@@ -1,4 +1,4 @@
-const Hapi = require('hapi');
+const Hapi = require('hapi')
 const path = require('path')
 const fs = require('fs-extra')
 const HapiWebMonetization = require('..')
@@ -21,7 +21,6 @@ const start = async () => {
       method: 'GET',
       path: '/',
       handler: function (request, reply) {
-        console.log("WE IN HERE")
         return reply.file('./example/index.html')
       }
     },
