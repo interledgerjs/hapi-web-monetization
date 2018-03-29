@@ -97,7 +97,7 @@ start()
 The client side code to support this is very simple too:
 
 ```html
-<script src="node_modules/koa-web-monetization/client.js"></script>
+<script src="node_modules/hapi-web-monetization/client.js"></script>
 <script>
   getMonetizationId('http://localhost:8080/pay/:id')
     .then(id => {
