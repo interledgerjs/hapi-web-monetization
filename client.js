@@ -14,8 +14,7 @@ function MonetizerClient(opts) {
           return response.json()
         })
         .then(function(response) {
-          // set cookie and/or receiverUrl.
-          // document.cookie = response.id
+          // Set cookie and receiverUrl.
           self.receiverUrl = self.receiverUrl.replace(/:id/, response.id)
           let responseId = response.id
           setCookie('payerId', response.id, 2)
