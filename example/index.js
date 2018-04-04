@@ -1,29 +1,16 @@
 const Hapi = require('hapi')
 const path = require('path')
 const fs = require('fs-extra')
-// const HapiWebMonetization = require('..')
-// const monetization = new HapiWebMonetization()
 
-// Register on top of Yar, and  check if monetized based on balance === 0; Build on top yar. Set ID of paying user. Server generates cookie. registered whole thing. generate ID on server side. .startPaying. monetizer.start
 const server = Hapi.server({
   port: 8080,
   host: 'localhost'
 })
 
-// function payMiddleware (request, reply) {
-//   return monetization.paid(request, reply, { price: 100, awaitBalance: true })
-// }
-
 const start = async () => {
   await server.register(require('inert'))
   await server.register(require('..'))
-  server.state('data', {
-    ttl: null,     // One day
-    isSecure: false,
-    isHttpOnly: true,
-    encoding: 'base64json',
-    clearInvalid: false,
-  });
+  
   server.route([
     {
       method: 'GET',

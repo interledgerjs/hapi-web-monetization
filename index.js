@@ -50,7 +50,7 @@ exports.register = (server, options, next) => {
         isHttpOnly: false, // prevent client alteration
         path: '/',
         domain: 'localhost',
-      };
+      }
       //header('Set-Cookie', 'payerId=' + id + '; ' + 'Max-Age=' + maxAge + '; ' + 'path=/; ' + 'SameSite=Lax;')
       return reply.response({ id }).header('Set-Cookie', 'payerId=' + id + '; ' + 'Domain=localhost:8080; ' + 'path=/; ' + 'SameSite=Lax;')
 

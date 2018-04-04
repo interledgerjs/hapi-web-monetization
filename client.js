@@ -17,7 +17,6 @@ function MonetizerClient(opts) {
           // set cookie and/or receiverUrl.
           // document.cookie = response.id
           self.receiverUrl = self.receiverUrl.replace(/:id/, response.id)
-          console.log("document cookies", document.cookie)
           let responseId = response.id
           setCookie('payerId', response.id, 2)
           resolve(responseId)
@@ -47,10 +46,10 @@ function MonetizerClient(opts) {
 }
 
 function setCookie(cname, cvalue, exdays) {
-    var d = new Date();
-    d.setTime(d.getTime() + (exdays*24*60*60*1000));
-    var expires = "expires="+ d.toUTCString();
-    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+    var d = new Date()
+    d.setTime(d.getTime() + (exdays*24*60*60*1000))
+    var expires = "expires="+ d.toUTCString()
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/"
 }
 
 function u8tohex (arr) {
