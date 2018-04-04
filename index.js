@@ -3,17 +3,8 @@ const EventEmitter = require('events')
 const getIlpPlugin = require('ilp-plugin')
 const debug = require('debug')('hapi-web-monetization')
 const Boom = require('boom')
-const Hoek = require('hoek');
-var getRandomValues = require('get-random-values');
-// const internals = {
-//   connected: false,
-//   buckets: new Map(),
-//   balanceEvents: new EventEmitter(),
-//   defaults: {
-//     plugin: getIlpPlugin(),
-//     maxBalance: Infinity
-//   }
-// }
+var getRandomValues = require('get-random-values')
+
 function u8tohex (arr) {
   var vals = [ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' ]
   var ret = ''
@@ -40,20 +31,28 @@ exports.register = (server, options, next) => {
     }
     async generateAndStoreId(request, reply) {
       let cachedId = await this.cache.get('payerId')
-      console.log("CACHED", cachedId);
-      let id;
+      let id
       if(!cachedId) {
         var idBytes = new Uint8Array(16)
         getRandomValues(idBytes)
         //This will be the cookie value.
         id = u8tohex(idBytes)
-        this.cache.set('payerId', id);
+        this.cache.set('payerId', id)
       }
       if(cachedId) {
         id = cachedId
       }
-
-      return reply.response({ id })
+      const maxAge = 60 * 60 * 100
+      var cookie_options = {
+        ttl: null, // expires a year from today
+        encoding: 'none', // we already used JWT to encode
+        isSecure: false, // warm & fuzzy feelings
+        isHttpOnly: false, // prevent client alteration
+        path: '/',
+        domain: 'localhost',
+      };
+      //header('Set-Cookie', 'payerId=' + id + '; ' + 'Max-Age=' + maxAge + '; ' + 'path=/; ' + 'SameSite=Lax;')
+      return reply.response({ id }).header('Set-Cookie', 'payerId=' + id + '; ' + 'Domain=localhost:8080; ' + 'path=/; ' + 'SameSite=Lax;')
 
     }
     async connect () {
@@ -98,7 +97,6 @@ exports.register = (server, options, next) => {
     async spend (price) {
       // Spend credit accumulated from browser monetising user on site. E.g. Viewing paid content.
       const id = await this.cache.get('payerId')
-      console.log("ID", id, this.buckets);
       const balance = this.buckets.get(id)
       if (!balance) {
         throw new Error('Balance does not exist - you must add a wallet.')
@@ -157,13 +155,12 @@ exports.register = (server, options, next) => {
         destination_account: resultAccount,
         shared_secret: sharedSecret.toString('base64')
       })
-      console.log("response", response)
       response.type('application/spsp+json')
       return response
     }
   }
 
-  server.decorate('request', 'monetizer', new HapiWebMonetization());
+  server.decorate('request', 'monetizer', new HapiWebMonetization())
 }
 
-exports.pkg = require('./package.json');
+exports.pkg = require('./package.json')

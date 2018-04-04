@@ -2,32 +2,24 @@ function MonetizerClient(opts) {
   var domain = new URL(window.location).origin
   this.url = domain
   if(opts && opts.url) {
-    this.url = opts.url;
+    this.url = opts.url
   }
   this.receiverUrl = this.url + '/pay/:id'
   this.getMonetizationId = function(getMonetizationIdUrl) {
     return new Promise ((resolve, reject) => {
       const fetchUrl = (getMonetizationIdUrl )|| this.url + '/getMonetizationId'
-      console.log("fetchURL", fetchUrl);
-      var self = this;
+      var self = this
       fetch(fetchUrl)
         .then(function(response) {
-          return response.json();
+          return response.json()
         })
         .then(function(response) {
           // set cookie and/or receiverUrl.
-          // document.cookie = response.id;
-          self.receiverUrl = self.receiverUrl.replace(/:id/, response.id);
-          console.log("document cookies", document.cookie);
+          // document.cookie = response.id
+          self.receiverUrl = self.receiverUrl.replace(/:id/, response.id)
+          console.log("document cookies", document.cookie)
           let responseId = response.id
-          // if(document.cookie) {
-          //   responseId = document.cookie.split('=')[1]
-          //   console.log("cookei id", responseId)
-          // } else {
-          //   document.cookie = setCookie('payerId', response.id, 3);
-          //   responseId = response.id
-          // }
-          console.log("responseId", responseId)
+          setCookie('payerId', response.id, 2)
           resolve(responseId)
         })
         .catch(function(error) {
@@ -37,8 +29,9 @@ function MonetizerClient(opts) {
 
   }
   this.start = function(id) {
-    var self = this;
+    var self = this
     return new Promise((resolve, reject) => {
+
       if(window.monetize) {
         window.monetize({
           receiver: self.receiverUrl
@@ -53,14 +46,11 @@ function MonetizerClient(opts) {
   }
 }
 
-function setCookie(name,value,days) {
-    var expires = "";
-    if (days) {
-        var date = new Date();
-        date.setTime(date.getTime() + (days*24*60*60*1000));
-        expires = "; expires=" + date.toUTCString();
-    }
-    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+function setCookie(cname, cvalue, exdays) {
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    var expires = "expires="+ d.toUTCString();
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
 }
 
 function u8tohex (arr) {
