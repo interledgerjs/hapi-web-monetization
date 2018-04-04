@@ -43,9 +43,9 @@ const server = Hapi.server({
 
 function payMiddleware (request, reply) {
   // This is the 'middleware' that allows the endpoint to charge 100 units to the user with request.params.id
-  // If awaitBalance is set to true, the call will stay open until the balance is sufficient. This is convenienct
+  // If awaitBalance is set to true, the call will stay open until the balance is sufficient. This is convenience
   // for making sure that the call doesn't immediately fail when called on startup.
-  return monetization.paid(request, reply, { price: 100, awaitBalance: true })
+  return monetization.paid({ price: 100, awaitBalance: true })
 }
 
 const start = async () => {
