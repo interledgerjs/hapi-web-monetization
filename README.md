@@ -7,7 +7,8 @@
   - [Prerequisites](#prerequisites)
   - [Install and Run](#install-and-run)
 - [API Docs](#api-docs)
-  - [Server Register Options](#server-register-options)
+  - [Server register options](#server-register-options)
+  - [Client constructor options](#client-constructor-options)
   - [Charging users](#charging-users)
 
 ## Overview
@@ -143,9 +144,19 @@ Registers a new `HapiWebMonetization` plugin which creates and sets cookie for t
 - `options.plugin` - Supply an ILP plugin. Defaults to using Moneyd.
 - `options.maxBalance` - The maximum balance that can be associated with any user. Defaults to `Infinity`.
 - `options.receiveEndpointUrl` - The endpoint in your Hapi route configuration that specifies where a user pays streams PSK packets to your site. Defaults to `/__monetizer/{id}` where `{id}` is the server generated ID (stored in the browser as a cookie).
-- `options.cookieName` - The cookie key name for your server generated payer ID. Defaults to `__monetizer`
+- `options.cookieName` - The cookie key name for your server generated payer ID. Defaults to `__monetizer`.
 - `options.cookieOptions` - Cookie configurations for Hapi. See [Hapi server state options](https://hapijs.com/api#-serverstatename-options) for more details!
 
+### Client constructor options
+
+```ts
+new MonetizerClient(options: Object | void): MonetizerClient
+```
+Creates a new `MonetizerClient` instance.
+
+- `options.url` - The url of the server that is registering the HapiWebMonetization plugin. Defaults `new URL(window.location).origin`
+- `options.cookieName` - The cookie key name that will be saved in your browser. Defaults to `__monetizer`.
+- `options.receiverUrl` - The endpoint where users of the site can start streaming packets via their browser extension or through the browser API. Defaults to `options.url + '__monetizer/:id'` where id is the server generated payer ID.
 
 ### Charging users
 
