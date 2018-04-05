@@ -144,7 +144,7 @@ Registers a new `HapiWebMonetization` plugin which creates and sets cookie for t
 - `options.maxBalance` - The maximum balance that can be associated with any user. Defaults to `Infinity`.
 - `options.receiveEndpointUrl` - The endpoint in your Hapi route configuration that specifies where a user pays streams PSK packets to your site. Defaults to `/__monetizer/{id}` where `{id}` is the server generated ID (stored in the browser as a cookie).
 - `options.cookieName` - The cookie key name for your server generated payer ID. Defaults to `__monetizer`
-- `options.cookie` - Cookie configurations for Hapi. See [Hapi server state options](https://hapijs.com/api#-serverstatename-options) for more details!
+- `options.cookieOptions` - Cookie configurations for Hapi. See [Hapi server state options](https://hapijs.com/api#-serverstatename-options) for more details!
 
 
 ### Charging users
