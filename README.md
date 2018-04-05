@@ -7,9 +7,8 @@
   - [Prerequisites](#prerequisites)
   - [Install and Run](#install-and-run)
 - [API Docs](#api-docs)
-  - [Constructor](#constructor)
-  - [Receiver](#receiver)
-  - [Paid](#paid)
+  - [Server Register Options](#server-register-options)
+  - [Charging users](#charging-users)
 
 ## Overview
 
@@ -33,23 +32,23 @@ section.
 ```js
 const Hapi = require('hapi')
 
-const WebMonetization = require('hapi-web-monetization')
-const monetization = new WebMonetization()
-
 const server = Hapi.server({
   port: 8080,
   host: 'localhost'
 })
 
-function payMiddleware (request, reply) {
-  // This is the 'middleware' that allows the endpoint to charge 100 units to the user with request.params.id
-  // If awaitBalance is set to true, the call will stay open until the balance is sufficient. This is convenienct
-  // for making sure that the call doesn't immediately fail when called on startup.
-  return monetization.paid(request, reply, { price: 100, awaitBalance: true })
+const options = {
+  cookieOptions: {
+    isSecure: true
+  }
 }
 
 const start = async () => {
   await server.register(require('inert'))
+  await server.register({
+    plugin: require('hapi-web-monetization'),
+    options
+  })
 
   server.route([
     {
@@ -61,26 +60,11 @@ const start = async () => {
     },
     {
       method: 'GET',
-      path: '/pay/{id}',
+      path: '/content/',
       handler: async function (request, reply) {
-        // This is the SPSP endpoint that lets you receive ILP payments.  Money that
-        // comes in is associated with the :id
-        return monetization.receive(request, reply)
-      }
-    },
-    {
-      method: 'GET',
-      path: '/content/{id}',
-      config: {
-        pre: [
-          {
-            method: payMiddleware,
-            assign: 'paid'
-          }
-        ],
-        handler: async function (request, reply) {
-          // Load content by :content_id
-        }
+        await request.awaitBalance(100)
+        request.spend(100)
+        // Send paid content
       }
     },
   ])
@@ -99,14 +83,17 @@ The client side code to support this is very simple too:
 ```html
 <script src="node_modules/hapi-web-monetization/client.js"></script>
 <script>
-  getMonetizationId('http://localhost:8080/pay/:id')
-    .then(id => {
+  var monetizerClient = new MonetizerClient();
+  monetizerClient.start()
+    .then(function() {
       var img = document.createElement('img')
       var container = document.getElementById('container')
-
-      img.src = '/content/' + id
+      img.src = '/content/'
       img.width = '600'
       container.appendChild(img)
+    })
+    .catch(function(error){
+      console.log("Error", error);
     })
 </script>
 ```
@@ -143,45 +130,36 @@ is coming in. Once the user has paid 100 units, the example image will load on
 the page.
 
 ## API Docs
-
-### Constructor
-
-```ts
-new HapiWebMonetization(opts: Object | void): HapiWebMonetization
-```
-
-Create a new `HapiWebMonetization` instance.
-
-- `opts.plugin` - Supply an ILP plugin. Defaults to using Moneyd.
-- `opts.maxBalance` - The maximum balance that can be associated with any user. Defaults to `Infinity`.
-
-### Receiver
+### Server register options
 
 ```ts
-instance.receiver(): Function
+  server.register({
+    plugin: require('hapi-web-monetization'),
+    options : Object | void
+  })
 ```
 
-Returns an object for setting up Interledger payments with
-[SPSP](https://github.com/sharafian/ilp-protocol-spsp) (used in Web
-Monetization).
+Registers a new `HapiWebMonetization` plugin which creates and sets cookie for the payer ID in the browser.
+- `options.plugin` - Supply an ILP plugin. Defaults to using Moneyd.
+- `options.maxBalance` - The maximum balance that can be associated with any user. Defaults to `Infinity`.
+- `options.receiveEndpointUrl` - The endpoint in your Hapi route configuration that specifies where a user pays streams PSK packets to your site. Defaults to `/__monetizer/{id}` where `{id}` is the server generated ID (stored in the browser as a cookie).
+- `options.cookieName` - The cookie key name for your server generated payer ID. Defaults to `__monetizer`
+- `options.cookie` - Cookie configurations for Hapi. See [Hapi server state options](https://hapijs.com/api#-serverstatename-options) for more details!
 
-The endpoint on which this is attached must contain `:id` in the path. This represents the id of the paying user.
 
-### Paid
+### Charging users
+
+The methods `request.spend()` and `request.awaitBalance()` are available to use inside handlers.
 
 ```ts
-instance.paid(opts: Object): Function
+request.spend(amount): Function
 ```
+Specifies how many units to charge the user.
 
-- `opts.price` - Function that takes Hapi `request` and returns price, or a number.
-  Specifies how many units to charge the user. Required.
-- `opts.awaitBalance` - Whether to make the HTTP call wait until the user has
-  sufficient balance. Defaults to `false`.
-
-Charges the user whose `:id` is in the path.  It
-is meant to be chained with other middlewares through Hapi's pre configuration, as shown in the [example
-code](#example-code)
-
+```ts
+request.awaitBalance(amount): Function
+```
+Waits until the user has sufficient balance to pay for specific content.
 `awaitBalance` can be useful for when a call is being done at page start.
 Rather than immediately failing because the user hasn't paid, the server will
 wait until the user has paid the specified price.
