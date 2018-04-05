@@ -20,7 +20,7 @@ to unlock exclusive content or paywalls.
 
 `hapi-web-monetization` makes this easy by providing middleware for your
 [Hapi](https://hapijs.com/) application. Charging your users is as easy as putting
-`monetization.spend(100)` in front of it. No need to convince them to
+`request.spend(100)` in your route handler. No need to convince them to
 buy a subscription or donate.
 
 ## Example Code
