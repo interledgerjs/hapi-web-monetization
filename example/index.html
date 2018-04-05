@@ -1,5 +1,11 @@
 <html>
 <head>
+  <script>
+    document.addEventListener('readystatechange', () => {
+      console.log('readyState', document.readyState)
+      console.log('monetize', window.monetize)
+    })
+  </script>
 </head>
 <body>
   <h1>Hello World</h1>
@@ -10,20 +16,17 @@
   <script src="/client.js"></script>
   <script>
     var monetizerClient = new MonetizerClient();
-    monetizerClient.getMonetizationId()
-    .then(function(id) {
-      return monetizerClient.start()
-    })
-    .then(function() {
-          var img = document.createElement('img')
-          var container = document.getElementById('container')
-          img.src = '/content/'
-          img.width = '600'
-          container.appendChild(img)
-    })
-    .catch(function(error){
+    monetizerClient.start()
+      .then(function() {
+        var img = document.createElement('img')
+        var container = document.getElementById('container')
+        img.src = '/content/'
+        img.width = '600'
+        container.appendChild(img)
+      })
+      .catch(function(error){
         console.log("Error", error);
-    })
+      })
   </script>
 </body>
 </html>

@@ -9,8 +9,15 @@ const server = Hapi.server({
 
 const start = async () => {
   await server.register(require('inert'))
-  await server.register(require('..'))
-  
+  await server.register({
+    plugin: require('..'),
+    options: {
+      cookieOptions: {
+        isSecure: false
+      }
+    }
+  })
+
   server.route([
     {
       method: 'GET',
@@ -21,26 +28,12 @@ const start = async () => {
     },
     {
       method: 'GET',
-      path: '/getMonetizationId',
-      handler: function (request, reply) {
-        return request.monetizer.generateAndStoreId(request, reply);
-      }
-    },
-    {
-      method: 'GET',
-      path: '/pay/{id}',
-      handler: function(request, reply) {
-        return request.monetizer.receive(request, reply);
-      }
-    },
-    {
-      method: 'GET',
       path: '/content/',
       config: {
-
         handler: async function (request, reply) {
-          request.monetizer.spend(100)
-          await request.monetizer.awaitBalance(100)
+          await request.awaitBalance(100)
+          // request.monetizer.spend(100)
+          // await request.monetizer.awaitBalance(100)
           const file = await fs.readFile(path.resolve(__dirname, 'content.jpg'))
           return file
         }

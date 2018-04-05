@@ -33,23 +33,23 @@ section.
 ```js
 const Hapi = require('hapi')
 
-const WebMonetization = require('hapi-web-monetization')
-const monetization = new WebMonetization()
-
 const server = Hapi.server({
   port: 8080,
   host: 'localhost'
 })
 
-function payMiddleware (request, reply) {
-  // This is the 'middleware' that allows the endpoint to charge 100 units to the user with request.params.id
-  // If awaitBalance is set to true, the call will stay open until the balance is sufficient. This is convenience
-  // for making sure that the call doesn't immediately fail when called on startup.
-  return monetization.paid({ price: 100, awaitBalance: true })
+const options = {
+  cookieOptions: {
+    isSecure: true
+  }
 }
 
 const start = async () => {
   await server.register(require('inert'))
+  await server.register({
+    plugin: require('hapi-web-monetization'),
+    options
+  })
 
   server.route([
     {
@@ -57,15 +57,6 @@ const start = async () => {
       path: '/',
       handler: function (request, reply) {
         // Load index page
-      }
-    },
-    {
-      method: 'GET',
-      path: '/pay/{id}',
-      handler: async function (request, reply) {
-        // This is the SPSP endpoint that lets you receive ILP payments.  Money that
-        // comes in is associated with the :id
-        return monetization.receive(request, reply)
       }
     },
     {
