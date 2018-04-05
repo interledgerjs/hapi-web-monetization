@@ -155,8 +155,8 @@ new MonetizerClient(options: Object | void): MonetizerClient
 Creates a new `MonetizerClient` instance.
 
 - `options.url` - The url of the server that is registering the HapiWebMonetization plugin. Defaults to `new URL(window.location).origin`
-- `options.cookieName` - The cookie key name that will be saved in your browser. Defaults to `__monetizer`.
-- `options.receiverUrl` - The endpoint where users of the site can start streaming packets via their browser extension or through the browser API. Defaults to `options.url + '__monetizer/:id'` where id is the server generated payer ID.
+- `options.cookieName` - The cookie key name that will be saved in your browser. Defaults to `__monetizer`. This MUST be the same has `options.cookieName` in the server configuration.
+- `options.receiverUrl` - The endpoint where users of the site can start streaming packets via their browser extension or through the browser API. Defaults to `options.url + '__monetizer/:id'` where id is the server generated payer ID. This MUST be the same has `options.receiverEndpointUrl` in the server configuration.
 
 ### Charging users
 
