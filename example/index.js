@@ -29,15 +29,13 @@ const start = async () => {
     {
       method: 'GET',
       path: '/content/',
-      config: {
-        handler: async function (request, reply) {
-          await request.awaitBalance(100)
-          // request.monetizer.spend(100)
-          // await request.monetizer.awaitBalance(100)
-          const file = await fs.readFile(path.resolve(__dirname, 'content.jpg'))
-          return file
-        }
+      handler: async function (request, reply) {
+        await request.awaitBalance(100)
+        request.spend(100)
+        const file = await fs.readFile(path.resolve(__dirname, 'content.jpg'))
+        return file
       }
+
     },
     {
       method: 'GET',

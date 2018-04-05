@@ -48,7 +48,7 @@ class HapiWebMonetization {
     })
   }
 
-  async awaitBalance (id, balance) {
+  awaitBalance (id, balance) {
     debug('awaiting balance. id=' + id, 'balance=' + balance)
     return new Promise(resolve => {
       const handleBalanceUpdate = _balance => {
